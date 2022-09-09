@@ -1,13 +1,44 @@
 import React, { useState } from "react";
 import Excel from "./Excel";
-import axios from "axios";
 import { utils, writeFile } from "xlsx";
+import * as _ from "lodash";
 
 function Home() {
   const [sheetData, setSheetData] = useState<any>(null);
   const [sheet, setSheet] = useState<any>(null);
   const [sheetNames, setSheetNames] = useState<any>("");
   const [sheetName, setSheetName] = useState<string>("mySheetData");
+  const [row, setrow] = useState<any[][]>([]);
+  const [show, setshow] = useState<Boolean>(false);
+
+  //open modal
+  const openModal = () => {
+    setshow(!show);
+  };
+
+  // get Row
+  const fetchTasks = async () => {
+    const res = await fetch("http://localhost:5000/row");
+    setrow(await res.json());
+  };
+
+  const uniqueFile = () => {
+    _.uniq(sheetData[sheet]);
+  };
+
+  // Add Row
+  const addTask = async () => {
+    const res = await fetch("http://localhost:5000/row", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    setrow(await res.json());
+    const ws = utils.aoa_to_sheet([["Header 1", "Header 2"]]);
+    utils.sheet_add_aoa(ws, setrow, { origin: -1 });
+  };
+
   const handlefileUploaded = (e: any) => {
     if (e) {
       let sheetNames = Object.keys(e);
@@ -32,7 +63,11 @@ function Home() {
 
   return (
     <div className="w-full">
-      <Excel onFileUploaded={(e: any) => handlefileUploaded(e)} />
+      <Excel
+        uniqueFile={uniqueFile}
+        onFileUploaded={(e: any) => handlefileUploaded(e)}
+        fetchTasks={fetchTasks}
+      />
 
       {sheetData && (
         <div>
@@ -79,11 +114,25 @@ function Home() {
       )}
       <div className="flex flex-col">
         <button
+          onClick={openModal}
           type="button"
           className="text-white w-60  ml-10 my-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
         >
           Add coustom property
         </button>
+
+        {show ? (
+          <>
+            <input type="text" />
+            <label htmlFor=""></label>
+            <input type="text" />
+            <label htmlFor=""></label>
+            <button onClick={addTask}></button>
+          </>
+        ) : (
+          ""
+        )}
+
         <div className="flex ml-10">
           <button
             onClick={handleOnExport}

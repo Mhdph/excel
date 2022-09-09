@@ -1,8 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { ChangeEventHandler, useRef, useState } from "react";
 import { read, utils } from "xlsx";
-
 interface ExceProps {
   onFileUploaded: Function;
+  uniqueFile: ChangeEventHandler<HTMLInputElement>;
+  fetchTasks: ChangeEventHandler<HTMLOptionElement>;
 }
 
 function Excel(props: ExceProps) {
@@ -49,7 +50,7 @@ function Excel(props: ExceProps) {
       </div>
       <div className="flex mb-2 w-full">
         <label className="mr-2">Apply configuration:</label>
-        <option value="Hello">
+        <option onChange={props.fetchTasks} value="Hello">
           <select name="Hello" id="">
             Hello
           </select>
@@ -61,6 +62,7 @@ function Excel(props: ExceProps) {
             <input
               id="vue-checkbox-list"
               type="checkbox"
+              onChange={props.uniqueFile}
               value=""
               className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 "
             />
