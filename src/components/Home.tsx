@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Excel from "./Excel";
 import { utils, writeFile } from "xlsx";
 import * as _ from "lodash";
+import axios from "axios";
 
 function Home() {
   const [sheetData, setSheetData] = useState<any>(null);
@@ -10,16 +11,44 @@ function Home() {
   const [sheetName, setSheetName] = useState<string>("mySheetData.xlsx");
   const [row, setrow] = useState<any>([]);
   const [show, setshow] = useState<Boolean>(false);
+  const [taskValue, setTaskValue] = useState<string>("");
+  const [type, setType] = useState<string>("");
+  const [selectedRow, setSelectedRow] = useState<any>("");
 
   //open modal
   const openModal = () => {
     setshow(!show);
   };
 
+  const inputHeader = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedRow(e.target.value);
+  };
+  const serachFilter = () => {
+    const indexRow = sheetData[sheet][0].indexOf(parseInt(selectedRow));
+
+    let index = 0;
+    sheetData[sheet].map((item: any) => {
+      sheetData[sheet].push([item[indexRow]]);
+      index += 1;
+    });
+    sheetData[sheet].splice(0, sheetData[sheet].length - index);
+    console.log(sheetData[sheet]);
+    setSheetData(sheetData);
+    console.log(sheetData);
+  };
+
   // get Row
   const fetchTasks = async () => {
     const res = await fetch("http://localhost:5000/row");
-    setrow(await res.json());
+    const data = await res.json();
+
+    const test: any = [];
+
+    data.map((item: any) => test.push(Object.keys(item)));
+
+    test.map((item: any) => sheetData[sheet].push(item));
+
+    setSheetData(sheetData);
   };
 
   const uniqueFile = () => {
@@ -36,18 +65,13 @@ function Home() {
 
   // Add Row
   const addTask = async () => {
-    setshow(!show);
-    const res = await fetch("http://localhost:5000/row", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-    });
-    setrow(await res.json());
+    const dataSend = {
+      header: selectedRow,
+      rowv: taskValue,
+    };
 
-    // const data = [mahdi];
-    // const ws = utils.aoa_to_sheet([["Header 1", "Header 2"]]);
-    // utils.sheet_add_aoa(ws, data, { origin: -1 });
+    setshow(!show);
+    const res = await axios.post("http://localhost:5000/row", dataSend);
   };
 
   const handlefileUploaded = (e: any) => {
@@ -77,11 +101,12 @@ function Home() {
   return (
     <div className="w-full">
       <Excel
+        serachFilter={serachFilter}
+        inputHeader={inputHeader}
         uniqueFile={uniqueFile}
         onFileUploaded={(e: any) => handlefileUploaded(e)}
         fetchTasks={fetchTasks}
       />
-
       {sheetData && (
         <div>
           <div className="flex w-full justify-around items-center mt-8">
@@ -129,9 +154,15 @@ function Home() {
         <button
           onClick={openModal}
           type="button"
-          className="text-white w-60  ml-10 my-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
+          className="text-white w-60  ml-10 my-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300  font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
         >
           Add coustom property
+        </button>
+        <button
+          className="text-white w-60  ml-10 my-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300  font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
+          onClick={fetchTasks}
+        >
+          Import
         </button>
 
         {show ? (
@@ -141,27 +172,32 @@ function Home() {
                 htmlFor="small-input"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Small input
+                Row Value
               </label>
               <input
+                onChange={(e: any) => setTaskValue(e.target.value)}
                 type="text"
                 id="small-input"
                 className="block p-2 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-xs focus:ring-blue-500 focus:border-blue-500 "
               />
             </div>
-            <div className="mb-6">
-              <label
-                htmlFor="small-input"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Small input
-              </label>
-              <input
-                type="text"
-                id="small-input"
-                className="block p-2 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-xs focus:ring-blue-500 focus:border-blue-500 "
-              />
-            </div>
+            <label
+              htmlFor="countries"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
+              Select an type
+            </label>
+            <select
+              onChange={(e) => setType(e.target.value)}
+              id="countries"
+              className="bg-gray-50 mb-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              <option selected>Choose a country</option>
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="FR">France</option>
+              <option value="DE">Germany</option>
+            </select>
             <button
               onClick={addTask}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
