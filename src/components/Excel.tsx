@@ -8,7 +8,7 @@ interface ExceProps {
 
 function Excel(props: ExceProps) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [blank, setBlank] = useState(true);
+  const [blank, setBlank] = useState(false);
 
   const radDataFromExcel = (data: any) => {
     const workBookData = read(data);
@@ -20,7 +20,7 @@ function Excel(props: ExceProps) {
 
       const jsonData = utils.sheet_to_json(workSheetData, {
         header: 1,
-        blankrows: blank,
+        blankrows: false,
       });
       mySheetData[sheetName] = jsonData;
     }
@@ -45,17 +45,21 @@ function Excel(props: ExceProps) {
         onChange={(event) => handleFile(event)}
       />
       <div className="flex mb-2">
-        <label className="mr-2">Choose header row:</label>
-        <input className="border border-gray-500 w-[85%]" type="text" />
+        <label className="mr-2 text-gray-600">Choose header row:</label>
+        <input
+          type="text"
+          id="small-input"
+          className="block p-2  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-xs focus:ring-blue-500 focus:border-blue-500 w-[85%]"
+        />
       </div>
-      <div className="flex mb-2 w-full">
-        <label className="mr-2">Apply configuration:</label>
+      {/* <div className="flex mb-2 w-full">
+        <label className="mr-2 text-gray-600">Apply configuration:</label>
         <option onChange={props.fetchTasks} value="Hello">
           <select name="Hello" id="">
             Hello
           </select>
         </option>
-      </div>
+      </div> */}
       <ul className="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 sm:flex ">
         <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
           <div className="flex items-center pl-3">

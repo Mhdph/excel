@@ -7,8 +7,8 @@ function Home() {
   const [sheetData, setSheetData] = useState<any>(null);
   const [sheet, setSheet] = useState<any>(null);
   const [sheetNames, setSheetNames] = useState<any>("");
-  const [sheetName, setSheetName] = useState<string>("mySheetData");
-  const [row, setrow] = useState<any[][]>([]);
+  const [sheetName, setSheetName] = useState<string>("mySheetData.xlsx");
+  const [row, setrow] = useState<any>([]);
   const [show, setshow] = useState<Boolean>(false);
 
   //open modal
@@ -23,11 +23,20 @@ function Home() {
   };
 
   const uniqueFile = () => {
-    _.uniq(sheetData[sheet]);
+    console.log(sheetData);
+
+    for (let index = 0; index < sheetData[sheet].length; index++) {
+      const oneRow = sheetData[sheet][index];
+      const uniqurow = _.uniq(oneRow);
+
+      sheetData[sheet][index] = uniqurow;
+    }
+    setSheetData(sheetData);
   };
 
   // Add Row
   const addTask = async () => {
+    setshow(!show);
     const res = await fetch("http://localhost:5000/row", {
       method: "POST",
       headers: {
@@ -35,8 +44,10 @@ function Home() {
       },
     });
     setrow(await res.json());
-    const ws = utils.aoa_to_sheet([["Header 1", "Header 2"]]);
-    utils.sheet_add_aoa(ws, setrow, { origin: -1 });
+
+    // const data = [mahdi];
+    // const ws = utils.aoa_to_sheet([["Header 1", "Header 2"]]);
+    // utils.sheet_add_aoa(ws, data, { origin: -1 });
   };
 
   const handlefileUploaded = (e: any) => {
@@ -48,6 +59,7 @@ function Home() {
       setSheetNames(null);
     }
     setSheetData(e);
+    console.log(e);
   };
 
   const handleSheetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,10 +67,11 @@ function Home() {
   };
 
   const handleOnExport = () => {
-    const wb = utils.book_new();
-    const ws = utils.aoa_to_sheet(sheetData);
-    utils.book_append_sheet(wb, ws, "mysheet");
-    writeFile(wb, sheetName);
+    const wb = utils.book_new(); // book
+    const ws = utils.aoa_to_sheet(sheetData[sheet]); // sheet
+
+    utils.book_append_sheet(wb, ws, "sheetnew"); //
+    writeFile(wb, sheetName + ".xlsx");
   };
 
   return (
@@ -122,30 +135,61 @@ function Home() {
         </button>
 
         {show ? (
-          <>
-            <input type="text" />
-            <label htmlFor=""></label>
-            <input type="text" />
-            <label htmlFor=""></label>
-            <button onClick={addTask}></button>
-          </>
+          <div className="w-1/4 ml-10 bg-white shadow-xl relative left-80 p-4 rounded">
+            <div className="mb-6">
+              <label
+                htmlFor="small-input"
+                className="block mb-2 text-sm font-medium text-gray-900 "
+              >
+                Small input
+              </label>
+              <input
+                type="text"
+                id="small-input"
+                className="block p-2 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-xs focus:ring-blue-500 focus:border-blue-500 "
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="small-input"
+                className="block mb-2 text-sm font-medium text-gray-900 "
+              >
+                Small input
+              </label>
+              <input
+                type="text"
+                id="small-input"
+                className="block p-2 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-xs focus:ring-blue-500 focus:border-blue-500 "
+              />
+            </div>
+            <button
+              onClick={addTask}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+            >
+              Add Task
+            </button>
+          </div>
         ) : (
           ""
         )}
 
-        <div className="flex ml-10">
+        <div className="relative ml-10 w-1/2">
+          <input
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSheetName(e.target.value)
+            }
+            type="search"
+            id="search"
+            className="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
+            placeholder="File name"
+          />
           <button
             onClick={handleOnExport}
-            type="button"
-            className="text-white my-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
+            type="submit"
+            className="text-white z-10 absolute right-2.5 bottom-2.5 bg-gradient-to-r from-green-400 via-green-500 to-green-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 "
           >
             Export
           </button>
-          <input
-            className="w-[85%]"
-            type="text"
-            onChange={(e: any) => e.target.value(setSheetName)}
-          />
         </div>
       </div>
     </div>
