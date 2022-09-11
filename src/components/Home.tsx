@@ -24,15 +24,15 @@ function Home() {
     setSelectedRow(e.target.value);
   };
   const serachFilter = () => {
+    console.log(sheetData);
     const indexRow = sheetData[sheet][0].indexOf(parseInt(selectedRow));
-
+    console.log(selectedRow);
     let index = 0;
     sheetData[sheet].map((item: any) => {
       sheetData[sheet].push([item[indexRow]]);
       index += 1;
     });
     sheetData[sheet].splice(0, sheetData[sheet].length - index);
-    console.log(sheetData[sheet]);
     setSheetData(sheetData);
     console.log(sheetData);
   };
