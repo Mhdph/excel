@@ -276,8 +276,9 @@ function Home() {
               <option selected>Choose a Type</option>
               <option value="Tx">Text</option>
               <option value="in">Integer</option>
-              <option value="FR">France</option>
-              <option value="DE">Germany</option>
+              <option value="FR">Float</option>
+              <option value="DE">Date</option>
+              <option value="DE">DateTime</option>
             </select>
             <button
               onClick={addTask}
